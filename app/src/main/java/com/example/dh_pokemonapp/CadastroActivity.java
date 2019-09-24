@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.ArrayList;
 
 import static com.example.dh_pokemonapp.LoginActivity.NAME_KEY;
 
@@ -17,11 +20,12 @@ public class CadastroActivity extends AppCompatActivity {
     private TextView boasVindas;
     private TextInputLayout txtProduto;
     private TextInputLayout txtValor;
-    private Button btnEnviar;
+    private Button btnFinalizar;
+    private FloatingActionButton btnAdd;
 
     public static final String PRODUCT_KEY = "product";
     public static final String PRICE_KEY = "price";
-    public static final String CONTADOR_KEY = "counter";
+    public ArrayList<Produto> produtos = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +35,10 @@ public class CadastroActivity extends AppCompatActivity {
         boasVindas = findViewById(R.id.textView);
         txtProduto = findViewById(R.id.textInputLayout1);
         txtValor = findViewById(R.id.textInputLayout2);
-        btnEnviar = findViewById(R.id.button2);
+        btnFinalizar = findViewById(R.id.button2);
+        btnAdd = findViewById(R.id.floatingActionButton);
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
 
         if (getIntent() != null && intent.getExtras() != null){
             Bundle bundle = intent.getExtras();
@@ -43,7 +48,7 @@ public class CadastroActivity extends AppCompatActivity {
             Snackbar.make(boasVindas, "Não há dados!", Snackbar.LENGTH_LONG).show();
         }
 
-        btnEnviar.setOnClickListener(new View.OnClickListener() {
+        btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -51,12 +56,12 @@ public class CadastroActivity extends AppCompatActivity {
                 String price = txtValor.getEditText().getText().toString();
 
                 if (!product.isEmpty() && !price.isEmpty()){
-                    Intent intent = new Intent(CadastroActivity.this, ProdutoActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString(PRODUCT_KEY, product);
-                    bundle.putString(PRICE_KEY, price);
-                    intent.putExtras(bundle);
-                    startActivity(intent);
+                    Produto novoProduto = new Produto(product, price);
+                    addProductInList(novoProduto);
+
+                    txtProduto.getEditText().setText("");
+                    txtValor.getEditText().setText("");
+
                 } else if (product.isEmpty()){
                     txtProduto.setError("O campo produto deve ser preenchido!");
                 } else {
@@ -66,6 +71,26 @@ public class CadastroActivity extends AppCompatActivity {
             }
         });
 
+        btnFinalizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intentToActivity();
+            }
+        });
 
     }
+
+    public void addProductInList(Produto produto){
+        produtos.add(produto);
+    }
+
+    public void intentToActivity(){
+        Intent intent = new Intent(CadastroActivity.this, ProdutoActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(PRODUCT_KEY, produtos);
+        intent.putExtras(bundle);
+        startActivity(intent);
+
+    }
+
 }
